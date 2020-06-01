@@ -204,7 +204,7 @@ public class EchoServer extends AbstractServer
                     super.setPort(Integer.parseInt(parameters[1]));
                     System.out.println("Port set to " + Integer.parseInt(parameters[1]));
                 } else {
-                    System.out.println("Can't do that now. Server is connected.");
+                    System.out.println("Error. Server is already connected.");
                 }
                 break;
 
@@ -216,7 +216,7 @@ public class EchoServer extends AbstractServer
                         //error listening for clients
                     }
                 } else {
-                    System.out.println("We are already started and listening for clients!.");
+                    System.out.println("Error. Server is already listening for connections.");
                 }
                 break;
 
