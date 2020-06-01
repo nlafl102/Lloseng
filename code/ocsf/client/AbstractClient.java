@@ -98,11 +98,13 @@ public abstract class AbstractClient implements Runnable {
 	 */
 	final public void openConnection() throws IOException {
 		// Do not do anything if the connection is already open
+
 		if (isConnected())
 			return;
 
 		// Create the sockets and the data streams
 		try {
+
 			clientSocket = new Socket(host, port);
 			output = new ObjectOutputStream(clientSocket.getOutputStream());
 			input = new ObjectInputStream(clientSocket.getInputStream());
@@ -114,7 +116,7 @@ public abstract class AbstractClient implements Runnable {
 				closeAll();
 			} catch (Exception exc) {
 			}
-
+	
 			throw ex; // Rethrow the exception.
 		}
 

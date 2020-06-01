@@ -16,7 +16,7 @@ import common.*;
  * @author Dr Robert Lagani&egrave;re
  * @version July 2000
  */
-public class ClientConsole implements ChatIF
+public class ServerConsole implements ChatIF
 {
   //Class variables *************************************************
 
@@ -30,7 +30,7 @@ public class ClientConsole implements ChatIF
   /**
    * The instance of the client that created this ConsoleChat.
    */
-  ChatClient client;
+  EchoServer server;
 
 
   //Constructors ****************************************************
@@ -41,18 +41,18 @@ public class ClientConsole implements ChatIF
    * @param host The host to connect to.
    * @param port The port to connect on.
    */
-  public ClientConsole(String username, String host, int port)
+  public ServerConsole(int port)
   {
 
+    server = new EchoServer(port);
     try
     {
-      client= new ChatClient(username, host, port, this);
-
+      server.listen();
     }
     catch(IOException exception)
     {
-      System.out.println("Error: Can't setup connection!"
-                + " Terminating client.");
+      System.out.println("Error: Can't listen for clients!"
+                + " Terminating server.");
       System.exit(1);
     }
   }
@@ -62,21 +62,24 @@ public class ClientConsole implements ChatIF
 
   /**
    * This method waits for input from the console.  Once it is
-   * received, it sends it to the client's message handler.
+   * received, it sends it to the clients.
    */
   public void accept()
   {
+
     try
     {
       BufferedReader fromConsole =
         new BufferedReader(new InputStreamReader(System.in));
       String message;
 
-    
       while (true)
       {
         message = fromConsole.readLine();
-        client.handleMessageFromClientUI(message);
+        server.handleMessageFromServerConsole(message);
+
+        this.display(message);
+
       }
     }
     catch (Exception ex)
@@ -95,70 +98,41 @@ public class ClientConsole implements ChatIF
   public void display(String message)
   {
 
-    if (message.startsWith("SERVER MSG> ")){
-
-      System.out.println(message);
-
-    }
-
-    else {
-
-      System.out.println(message);
-
-    }
+    if (message.startsWith("#")){ return;}
 
 
+    System.out.println("SERVER MSG> " + message);
   }
 
 
   //Class methods ***************************************************
 
-  /**
-   * This method is responsible for the creation of the Client UI.
-   *
-   * @param args[0] The host to connect to.
-   */
   public static void main(String[] args)
   {
-    String host = "";
-    int port = 0;  //The port number
-
+    int port = 0; //Port to listen on
 
     try
     {
-      args[0].getClass();
+      port = Integer.parseInt(args[0]); //Get port from command line
     }
-
-    catch(ArrayIndexOutOfBoundsException e)
+    catch(Throwable t)
     {
-
-      System.err.println("ERROR - No login ID specified. Connection aborted.");
-      System.exit(1);
-      return;
-
+      port = DEFAULT_PORT; //Set port to 5555
     }
 
+    ServerConsole sv = new ServerConsole(port);
 
     try
     {
-      host = args[1];
+      sv.server.listen(); //Start listening for connections
     }
-    catch(ArrayIndexOutOfBoundsException e)
+    catch (Exception ex)
     {
-      host = "localhost";
+      System.out.println("ERROR - Could not listen for clients!");
     }
 
-    try
-    {
-      port = Integer.parseInt(args[2]);
-    }
-    catch(ArrayIndexOutOfBoundsException e)
-    {
-      port = DEFAULT_PORT;
-    }
+    sv.accept();
 
-    ClientConsole chat= new ClientConsole(args[0],host, port);
-    chat.accept();  //Wait for console data
   }
 }
 //End of ConsoleChat class

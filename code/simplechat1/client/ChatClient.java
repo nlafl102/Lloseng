@@ -26,6 +26,7 @@ public class ChatClient extends AbstractClient
    * the display method in the client.
    */
   ChatIF clientUI;
+  String username;
 
 
   //Constructors ****************************************************
@@ -38,12 +39,20 @@ public class ChatClient extends AbstractClient
    * @param clientUI The interface type variable.
    */
 
-  public ChatClient(String host, int port, ChatIF clientUI)
+  public ChatClient(String username, String host, int port, ChatIF clientUI)
     throws IOException
   {
+
     super(host, port); //Call the superclass constructor
     this.clientUI = clientUI;
+    this.username = username;
+
+
+
+
     openConnection();
+    sendToServer("#login <" + username + ">");
+
   }
 
 
@@ -57,7 +66,12 @@ public class ChatClient extends AbstractClient
   public void handleMessageFromServer(Object msg)
   {
     clientUI.display(msg.toString());
+
+
+
   }
+
+
 
 
 
@@ -70,7 +84,11 @@ public class ChatClient extends AbstractClient
     try
     {
       closeConnection();
+
+
     }
+
+
     catch(IOException e) {}
     System.exit(0);
   }
@@ -83,6 +101,8 @@ public class ChatClient extends AbstractClient
   protected void connectionClosed()
   {
     System.out.println("Connection to server has been terminated.");
+
+
   }
 
   /**
@@ -95,6 +115,8 @@ public class ChatClient extends AbstractClient
   {
     System.out.println("WARNING - The server has stopped listening. The server will now shut down.");
 quit();
+
+
   }
 
 
@@ -104,14 +126,22 @@ quit();
    * @param message The message from the UI.
    */
     public void handleMessageFromClientUI(String message) {
+
+
         if (message.startsWith("#")) {
             String[] parameters = message.split(" ");
-            String command = parameters[0];
-            switch (command) {
+            String consoleCommand = parameters[0];
+
+
+
+
+            switch (consoleCommand) {
                 case "#quit":
+
                     quit();
                     break;
                 case "#logoff":
+
                     try {
                         closeConnection();
                     } catch (IOException e) {
@@ -119,38 +149,51 @@ quit();
                     }
                     break;
                 case "#sethost":
+
                     if (this.isConnected()) {
                         System.out.println("Can't do that now. Already connected.");
                     } else {
+                        System.out.println("sethost");
                         this.setHost(parameters[1]);
                     }
                     break;
                 case "#setport":
+
                     if (this.isConnected()) {
                         System.out.println("Can't do that now. Already connected.");
                     } else {
                         this.setPort(Integer.parseInt(parameters[1]));
+
                     }
                     break;
                 case "#login":
+
                     if (this.isConnected()) {
                         System.out.println("Can't do that now. Already connected.");
                     } else {
                         try {
                             this.openConnection();
+                            sendToServer("#login <" + this.username + ">");
                         } catch (IOException e) {
                             System.out.println("Error opening connection to server. Perhaps the server is not running!");
                         }
                     }
                     break;
                 case "#gethost":
+
                     System.out.println("Current host is " + this.getHost());
                     break;
+
                 case "#getport":
                     System.out.println("Current port is " + this.getPort());
                     break;
+
+
+
                 default:
-                    System.out.println("Invalid command: '" + command+ "'");
+                
+                    System.out.println("Invalid command: '" + consoleCommand+ "'");
+                    System.out.println("If you typed in #login <" +username+ ">, simply type in #login to login.");
                     break;
             }
         } else {
