@@ -127,58 +127,63 @@ quit();
    */
     public void handleMessageFromClientUI(String message) {
 
-
+      //check if its a command
         if (message.startsWith("#")) {
             String[] parameters = message.split(" ");
             String consoleCommand = parameters[0];
 
 
 
-
+            //switch through all command cases
             switch (consoleCommand) {
                 case "#quit":
 
                     quit();
                     break;
+
                 case "#logoff":
 
                     try {
                         closeConnection();
                     } catch (IOException e) {
-                        System.out.println("Error closing connection!!!");
+                        System.out.println("Error. Could not close connection.");
                     }
                     break;
+
                 case "#sethost":
 
                     if (this.isConnected()) {
-                        System.out.println("Can't do that now. Already connected.");
+                        System.out.println("Error. Already connected to server.");
                     } else {
                         System.out.println("sethost");
                         this.setHost(parameters[1]);
                     }
                     break;
+
                 case "#setport":
 
                     if (this.isConnected()) {
-                        System.out.println("Can't do that now. Already connected.");
+                        System.out.println("Error. Already connected to server.");
                     } else {
                         this.setPort(Integer.parseInt(parameters[1]));
 
                     }
                     break;
+
                 case "#login":
 
                     if (this.isConnected()) {
-                        System.out.println("Can't do that now. Already connected.");
+                        System.out.println("Error. Already connected to server.");
                     } else {
                         try {
                             this.openConnection();
                             sendToServer("#login <" + this.username + ">");
                         } catch (IOException e) {
-                            System.out.println("Error opening connection to server. Perhaps the server is not running!");
+                            System.out.println("Error opening connection to server.");
                         }
                     }
                     break;
+
                 case "#gethost":
 
                     System.out.println("Current host is " + this.getHost());
@@ -191,7 +196,7 @@ quit();
 
 
                 default:
-                
+
                     System.out.println("Invalid command: '" + consoleCommand+ "'");
                     System.out.println("If you typed in #login <" +username+ ">, simply type in #login to login.");
                     break;

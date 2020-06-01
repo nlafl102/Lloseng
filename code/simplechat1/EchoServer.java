@@ -46,35 +46,47 @@ public class EchoServer extends AbstractServer
    * @param client The connection from which the message originated.
    */
    public void handleMessageFromClient(Object msg, ConnectionToClient client) {
+
+
+          //check if its a command for setting the user info
+
            String message = msg.toString();
            if (message.startsWith("#")) {
-               String[] params = message.substring(1).split(" ");
-               if (params[0].equalsIgnoreCase("login") && params.length > 1) {
+
+               String[] parameters = message.substring(1).split(" ");
+
+
+
+               //check that there is a login followed by a username
+               if (parameters[0].equals("login") && parameters.length > 1) {
+
+
+                  //check if username has been set. if yes, send the set the inffo and send the information to the other clients on the server
                    if (client.getInfo("username") == null) {
 
-                       client.setInfo("username", params[1]);
+                       client.setInfo("username", parameters[1]);
 
-                       System.out.println("Message received #login " + params[1]);
-                       this.sendToAllClients(params[1] + " has logged on.");
+                       System.out.println("Message received #login " + parameters[1]);
+                       this.sendToAllClients(parameters[1] + " has logged on.");
 
 
-                   } else {
+                   } else { //if the username is already set, it is an invalid command and must return an error
                        try {
-                           client.sendToClient("Your username has already been set!");
+                           client.sendToClient("Error. You already have a username.");
                        } catch (IOException e) {
                        }
                    }
 
                }
-           } else {
+           } else {//check if the login was the first command. If not, we return an error.
                if (client.getInfo("username") == null) {
                    try {
-                       client.sendToClient("Please set a username before messaging the server!");
+                       client.sendToClient("Error. A username must be set before sending messages to the server.");
                        client.close();
                    } catch (IOException e) {
                        e.printStackTrace();
                    }
-               } else {
+               } else {//if the username is already set, we can send the message to the clients and we print the appropriate statement to the server.
                    System.out.println("Message received: " + msg + " from " + client.getInfo("username"));
                    this.sendToAllClients(client.getInfo("username") + " > " + message);
                }
@@ -160,8 +172,12 @@ public class EchoServer extends AbstractServer
       public void handleMessageFromServerConsole(String message) {
     if (message.startsWith("#")) {
         String[] parameters = message.split(" ");
-        String command = parameters[0];
-        switch (command) {
+
+
+        String consoleCommand = parameters[0];
+
+        //we go through all cases for potential commands if the console line starts with a #.
+        switch (consoleCommand) {
             case "#quit":
                 //closes the server and then exits it
                 try {
@@ -171,15 +187,18 @@ public class EchoServer extends AbstractServer
                 }
                 System.exit(0);
                 break;
+
             case "#stop":
                 this.stopListening();
                 break;
+
             case "#close":
                 try {
                     this.close();
                 } catch (IOException e) {
                 }
                 break;
+
             case "#setport":
                 if (!this.isListening() && this.getNumberOfClients() < 1) {
                     super.setPort(Integer.parseInt(parameters[1]));
@@ -188,6 +207,7 @@ public class EchoServer extends AbstractServer
                     System.out.println("Can't do that now. Server is connected.");
                 }
                 break;
+
             case "#start":
                 if (!this.isListening()) {
                     try {
@@ -199,14 +219,16 @@ public class EchoServer extends AbstractServer
                     System.out.println("We are already started and listening for clients!.");
                 }
                 break;
+
             case "#getport":
                 System.out.println("Current port is " + this.getPort());
                 break;
+
             default:
-                System.out.println("Invalid command: '" + command+ "'");
+                System.out.println("Invalid command: '" + consoleCommand+ "'");
                 break;
         }
-    } else {
+    } else {//if it isnt a command, we simply send it to the other clients as a server message.
 
         message = "SERVER MSG> " + message;
         this.sendToAllClients(message);
